@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.util.StringUtils;
 
@@ -54,7 +55,7 @@ public class OAuth2AuthenticationEntryPoint extends AbstractOAuth2SecurityExcept
 	}
 
 	@Override
-	protected ResponseEntity<?> enhanceResponse(ResponseEntity<?> response, Exception exception) {
+	protected ResponseEntity<OAuth2Exception> enhanceResponse(ResponseEntity<OAuth2Exception> response, Exception exception) {
 		HttpHeaders headers = response.getHeaders();
 		String existing = null;
 		if (headers.containsKey("WWW-Authenticate")) {
@@ -69,7 +70,7 @@ public class OAuth2AuthenticationEntryPoint extends AbstractOAuth2SecurityExcept
 		HttpHeaders update = new HttpHeaders();
 		update.putAll(response.getHeaders());
 		update.set("WWW-Authenticate", builder.toString());
-		return new ResponseEntity<Object>(response.getBody(), update, response.getStatusCode());
+		return new ResponseEntity<OAuth2Exception>(response.getBody(), update, response.getStatusCode());
 	}
 
 	private String extractTypePrefix(String header) {

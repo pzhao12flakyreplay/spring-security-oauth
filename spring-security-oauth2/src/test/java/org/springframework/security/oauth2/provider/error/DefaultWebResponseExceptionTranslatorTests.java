@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
  * @author Joe Grandja
  */
 public class DefaultWebResponseExceptionTranslatorTests {
-	private WebResponseExceptionTranslator<OAuth2Exception> translator = new DefaultWebResponseExceptionTranslator();
+	private WebResponseExceptionTranslator translator = new DefaultWebResponseExceptionTranslator();
 
 	// gh-1200
 	@Test

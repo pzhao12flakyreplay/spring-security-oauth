@@ -33,17 +33,13 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
  * Default implementation of {@link AccessTokenConverter}.
  * 
  * @author Dave Syer
- * @author Vedran Pavic
+ * 
  */
 public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 	private UserAuthenticationConverter userTokenConverter = new DefaultUserAuthenticationConverter();
 	
 	private boolean includeGrantType;
-
-	private String scopeAttribute = SCOPE;
-
-	private String clientIdAttribute = CLIENT_ID;
 
 	/**
 	 * Converter for the part of the data in the token representing a user.
@@ -63,26 +59,6 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		this.includeGrantType = includeGrantType;	
 	}
 
-	/**
-	 * Set scope attribute name to be used in the converted token. Defaults to
-	 * {@link AccessTokenConverter#SCOPE}.
-	 *
-	 * @param scopeAttribute the scope attribute name to use
-	 */
-	public void setScopeAttribute(String scopeAttribute) {
-		this.scopeAttribute = scopeAttribute;
-	}
-
-	/**
-	 * Set client id attribute name to be used in the converted token. Defaults to
-	 * {@link AccessTokenConverter#CLIENT_ID}.
-	 *
-	 * @param clientIdAttribute the client id attribute name to use
-	 */
-	public void setClientIdAttribute(String clientIdAttribute) {
-		this.clientIdAttribute = clientIdAttribute;
-	}
-
 	public Map<String, ?> convertAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
 		Map<String, Object> response = new HashMap<String, Object>();
 		OAuth2Request clientToken = authentication.getOAuth2Request();
@@ -97,7 +73,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		}
 
 		if (token.getScope()!=null) {
-			response.put(scopeAttribute, token.getScope());
+			response.put(SCOPE, token.getScope());
 		}
 		if (token.getAdditionalInformation().containsKey(JTI)) {
 			response.put(JTI, token.getAdditionalInformation().get(JTI));
@@ -113,7 +89,7 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 		response.putAll(token.getAdditionalInformation());
 
-		response.put(clientIdAttribute, clientToken.getClientId());
+		response.put(CLIENT_ID, clientToken.getClientId());
 		if (clientToken.getResourceIds() != null && !clientToken.getResourceIds().isEmpty()) {
 			response.put(AUD, clientToken.getResourceIds());
 		}
@@ -125,8 +101,8 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		Map<String, Object> info = new HashMap<String, Object>(map);
 		info.remove(EXP);
 		info.remove(AUD);
-		info.remove(clientIdAttribute);
-		info.remove(scopeAttribute);
+		info.remove(CLIENT_ID);
+		info.remove(SCOPE);
 		if (map.containsKey(EXP)) {
 			token.setExpiration(new Date((Long) map.get(EXP) * 1000L));
 		}
@@ -142,8 +118,8 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 		Map<String, String> parameters = new HashMap<String, String>();
 		Set<String> scope = extractScope(map);
 		Authentication user = userTokenConverter.extractAuthentication(map);
-		String clientId = (String) map.get(clientIdAttribute);
-		parameters.put(clientIdAttribute, clientId);
+		String clientId = (String) map.get(CLIENT_ID);
+		parameters.put(CLIENT_ID, clientId);
 		if (includeGrantType && map.containsKey(GRANT_TYPE)) {
 			parameters.put(GRANT_TYPE, (String) map.get(GRANT_TYPE));
 		}
@@ -173,8 +149,8 @@ public class DefaultAccessTokenConverter implements AccessTokenConverter {
 
 	private Set<String> extractScope(Map<String, ?> map) {
 		Set<String> scope = Collections.emptySet();
-		if (map.containsKey(scopeAttribute)) {
-			Object scopeObj = map.get(scopeAttribute);
+		if (map.containsKey(SCOPE)) {
+			Object scopeObj = map.get(SCOPE);
 			if (String.class.isInstance(scopeObj)) {
 				scope = new LinkedHashSet<String>(Arrays.asList(String.class.cast(scopeObj).split(" ")));
 			} else if (Collection.class.isAssignableFrom(scopeObj.getClass())) {

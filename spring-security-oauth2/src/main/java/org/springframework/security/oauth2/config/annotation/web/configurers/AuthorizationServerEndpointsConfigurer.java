@@ -33,7 +33,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.common.util.ProxyCreator;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -53,9 +52,7 @@ import org.springframework.security.oauth2.provider.client.InMemoryClientDetails
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeTokenGranter;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.endpoint.DefaultRedirectResolver;
 import org.springframework.security.oauth2.provider.endpoint.FrameworkEndpointHandlerMapping;
-import org.springframework.security.oauth2.provider.endpoint.RedirectResolver;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGranter;
@@ -138,9 +135,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 
 	private boolean reuseRefreshToken = true;
 
-	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator;
-
-	private RedirectResolver redirectResolver;
+	private WebResponseExceptionTranslator exceptionTranslator;
 
 	public AuthorizationServerTokenServices getTokenServices() {
 		return ProxyCreator.getProxy(AuthorizationServerTokenServices.class,
@@ -222,11 +217,6 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer redirectResolver(RedirectResolver redirectResolver) {
-		this.redirectResolver = redirectResolver;
-		return this;
-	}
-
 	public boolean isTokenServicesOverride() {
 		return tokenServicesOverride;
 	}
@@ -280,7 +270,7 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return this;
 	}
 
-	public AuthorizationServerEndpointsConfigurer exceptionTranslator(WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator) {
+	public AuthorizationServerEndpointsConfigurer exceptionTranslator(WebResponseExceptionTranslator exceptionTranslator) {
 		this.exceptionTranslator = exceptionTranslator;
 		return this;
 	}
@@ -366,12 +356,8 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return frameworkEndpointHandlerMapping();
 	}
 
-	public WebResponseExceptionTranslator<OAuth2Exception> getExceptionTranslator() {
+	public WebResponseExceptionTranslator getExceptionTranslator() {
 		return exceptionTranslator();
-	}
-
-	public RedirectResolver getRedirectResolver() {
-		return redirectResolver();
 	}
 
 	private ResourceServerTokenServices resourceTokenServices() {
@@ -518,20 +504,12 @@ public final class AuthorizationServerEndpointsConfigurer {
 		return authorizationCodeServices;
 	}
 
-	private WebResponseExceptionTranslator<OAuth2Exception> exceptionTranslator() {
+	private WebResponseExceptionTranslator exceptionTranslator() {
 		if (exceptionTranslator != null) {
 			return exceptionTranslator;
 		}
 		exceptionTranslator = new DefaultWebResponseExceptionTranslator();
 		return exceptionTranslator;
-	}
-
-	private RedirectResolver redirectResolver() {
-		if (redirectResolver != null) {
-			return redirectResolver;
-		}
-		redirectResolver = new DefaultRedirectResolver();
-		return redirectResolver;
 	}
 
 	private OAuth2RequestFactory requestFactory() {
